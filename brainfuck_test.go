@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -88,6 +89,24 @@ func TestHelloWorld(t *testing.T) {
 	// }
 }
 
+func TestYetAnotherHelloWorld(t *testing.T) {
+	code := `>+++++++++[<++++++++>-]<.>+++++++[<++++>-]<+.+++++++..+++.>>>++++++++[<++++>-]
+	<.>>>++++++++++[<+++++++++>-]<---.<<<<.+++.------.--------.>>+.>++++++++++.`
+	output := Run(code, nil)
+	if string(output) != "Hello World!\n" {
+		t.FailNow()
+	}
+}
+
+func TestSimpleStream(t *testing.T) {
+	r := strings.NewReader("a")
+	code := ",."
+	output := Run(code, r)
+	if string(output) != "a" {
+		t.FailNow()
+	}
+}
+
 func TestROT13(t *testing.T) {
 	code := `
 -,+[                         Read first character and start outer character reading loop
@@ -119,9 +138,9 @@ func TestROT13(t *testing.T) {
     <-,+                     Read next character
 ]                            End character reading loop
 	`
-	output := Run(code, []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+	r := strings.NewReader("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+	output := Run(code, r)
 	if string(output) != "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm" {
 		t.FailNow()
 	}
-
 }

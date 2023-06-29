@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 type OpCode int
 
@@ -74,12 +77,12 @@ var jumpTable [8]ExecuteFunction = [8]ExecuteFunction{
 		return &context.data[*dp]
 	},
 	IN: func(pc, dp, ic *int, context *Context) *byte {
-		if *ic >= len(context.input) {
-			context.data[*dp] = 255
-		} else {
-			context.data[*dp] = context.input[*ic]
+		input_value := make([]byte, 1)
+		_, err := context.input.Read(input_value)
+		if err != nil {
+			panic(fmt.Sprintf("brainfuck: reaching a comma but input is not available at %v", *pc))
 		}
-		*ic++
+		context.data[*dp] = input_value[0]
 		*pc++
 		return nil
 	},
@@ -105,10 +108,10 @@ type Context struct {
 	close2Open map[int]int
 
 	data  []byte
-	input []byte
+	input io.Reader
 }
 
-func Run(codeStr string, input []byte) (output []byte) {
+func Run(codeStr string, input io.Reader) (output []byte) {
 	// sanitize
 	var code = []OpCode{}
 	for _, v := range codeStr {
